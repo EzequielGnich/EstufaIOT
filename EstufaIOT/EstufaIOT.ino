@@ -80,15 +80,6 @@ void loop()
   delay(3000);
   soil_hum_verify();
   soil_temperature_verify();
-
-  //coloca e mantém o pino latch em low enquanto ocorre a transmissão
-  digitalWrite(latch, LOW);
-  //transmite o valor de j, a começar pelo bit menos significativo
-  shiftOut(data, clk, LSBFIRST, 0xAA);
-  //retorna o pino latch para high para sinalizar ao chip
-  //que esse não precisa mais esperar por informação
-  digitalWrite(latch, HIGH);
-  delay(500);
 }
 
 /****************** INICIO SENSOR HUMIDADE E TEMPERATURA DO AR ***************************/
@@ -234,6 +225,19 @@ void soil_hum_verify(void) {
         Serial.println(SOIL_HUM);
       }
     }
+  }
+
+  SOIL_HUM = 42;
+
+  if (SOIL_HUM > 41) {
+      
+    //coloca e mantém o pino latch em low enquanto ocorre a transmissão
+    digitalWrite(latch, LOW);
+    //transmite o valor de j, a começar pelo bit menos significativo
+    shiftOut(data, clk, LSBFIRST, 0b11111111);
+    //retorna o pino latch para high para sinalizar ao chip
+    //que esse não precisa mais esperar por informação
+    digitalWrite(latch, HIGH);
   }
   delay(1000);
   digitalWrite(PORT_RELAY_PUMP, HIGH);
