@@ -48,9 +48,20 @@ OneWire pino(ONE_WIRE_PIN);
 DallasTemperature barramento(&pino);
 DeviceAddress sensor;
 
+/******************************** CONFIGURAÇÃO 74HC595 **********************************/
+
+int const clk = 11;  // Pino 11 do 74HC595
+int const latch = 12;  // Pino 12 do 74HC595
+int const data  = 13;  // Pino 13 do 74HC595
+
+
 /***************************** INICIO DO SETUP DO PROGRAMA ******************************/
 void setup()
 {
+  pinMode(clk,OUTPUT);
+  pinMode(latch,OUTPUT);
+  pinMode(data,OUTPUT);
+  
   Serial.begin(9600);
   findDS18B20Sensor(sensor);
   define_pin_relay();
@@ -69,6 +80,15 @@ void loop()
   delay(3000);
   soil_hum_verify();
   soil_temperature_verify();
+
+  //coloca e mantém o pino latch em low enquanto ocorre a transmissão
+  digitalWrite(latch, LOW);
+  //transmite o valor de j, a começar pelo bit menos significativo
+  shiftOut(data, clk, LSBFIRST, 0xAA);
+  //retorna o pino latch para high para sinalizar ao chip
+  //que esse não precisa mais esperar por informação
+  digitalWrite(latch, HIGH);
+  delay(500);
 }
 
 /****************** INICIO SENSOR HUMIDADE E TEMPERATURA DO AR ***************************/
